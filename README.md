@@ -12,6 +12,10 @@
 
 成绩更新后**自动发通知到微信** 以节省您宝贵的时间
 
+本项目在由 [xwy231321](https://github.com/xwy231321/ZFCheckScores) 
+修改的开源项目 [ZFCheckScores](https://github.com/NianBroken/ZFCheckScores/) 
+的基础上添加推送教务系统通知而来，本项目将依照 [NianBroken](https://github.com/NianBroken) 
+的开源许可证[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0 "Apache-2.0")进行修改与二次开源。
 ## 测试环境
 
 正方教务管理系统 版本 V8.0、V9.0
@@ -119,8 +123,9 @@ _若是第一次运行程序，上述步骤会执行两遍_
 
 [openschoolcn/zfn_api](https://github.com/openschoolcn/zfn_api "openschoolcn/zfn_api")
 
-[https://github.com/NianBroken/ZFCheckScores/](https://github.com/NianBroken/ZFCheckScores/)
+[https://github.com/NianBroken/ZFCheckScores](https://github.com/NianBroken/ZFCheckScores)
 
+[https://github.com/xwy231321/ZFCheckScores](https://github.com/xwy231321/ZFCheckScores)
 ## 其他
 
 欢迎提交 `Issues` 和 `Pull requests`

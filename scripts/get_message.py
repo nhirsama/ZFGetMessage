@@ -1,6 +1,8 @@
 import base64
 import os
 import sys
+import hashlib
+import datetime
 from pprint import pprint
 
 from scripts.push import check_message_push
@@ -11,7 +13,9 @@ def write_file(words: dict):
     with open("../data/message_num.txt", "w", encoding="utf-8") as file:
         for dict_key,dict_value in words:
             file.write(f"{dict_key}: {dict_value}\n")
-
+def write_file_list(words: list):
+    with open("../data/message_num.txt", "w", encoding="utf-8") as file:
+        file.write(f"{hashlib.md5(str(words).encode()).hexdigest()}")
 
 cookies = {}
 base_url = "https://jwglxxfwpt.hebeu.edu.cn/"  # 此处填写教务系统URL
@@ -49,17 +53,38 @@ result = stu.get_notifications()  # 获取通知消息
 # result = stu.get_selected_courses(2024, 1)  # 获取已选课程信息
 # result = stu.get_block_courses(2024, 1, 1)  # 获取选课板块课列表
 pprint(result, sort_dicts=False)
-other = [], tiao_ke = [], ting_ke = [], bu_ke = []
-message_num = {'调课提醒': 0, '停课提醒': 0, '补课提醒': 0, '其他信息': 0}
+# other = [], tiao_ke = [], ting_ke = [], bu_ke = []
+# message_num = {'调课提醒': 0, '停课提醒': 0, '补课提醒': 0, '其他信息': 0}
+# with open("../data/message_num.txt", "r", encoding="utf-8") as file:
+#     while True:
+#         content = file.readline()
+#         if content == "":
+#             break
+#         key, value = content.split(':')
+#         result[key] = int(value)
+#
 with open("../data/message_num.txt", "r", encoding="utf-8") as file:
-    while True:
-        content = file.readline()
-        if content == "":
-            break
-        key, value = content.split(':')
-        result[key] = int(value)
+    push_hash = file.read()
+push_list = []
+for i in range(6):  #运行六次，如果第六次仍然无法与文件匹配则直接进行推送
+    #将第i个元素信息与message_num.txt文件对比，如果相同则跳出循环，进行推送
+    if hashlib.md5(str(result['data'][i]).encode()).hexdigest() == push_hash:
+        break
+    push_list.append(result['data'][i])
+    if i == 5:
+        break
 
+#将最新通知的md5值存入文件中
+with open("../data/message_num.txt", "w", encoding="utf-8") as file:
+    file.write(hashlib.md5(str(result['data'][0]).encode()).hexdigest())
+if len(push_list) > 0 :
+    print(check_message_push(token, '正方教务管理系统消息通知', push_list),f"于{datetime.datetime.now()}")
+else :
+    print(f"教务系统未更新新通知，于{datetime.datetime.now()}")
+'''
 for i in result['data']:
+
+    
     if i['type'] == '调课提醒':
         tiao_ke.append(i)
         if len(tiao_ke) > int(message_num['调课提醒']):
@@ -84,6 +109,6 @@ for i in result['data']:
             print(check_message_push(token, '正方教务管理系统其他通知', tiao_ke[0]))
             message_num['其他信息'] += 1
             break
-
-write_file(message_num)
+    '''
+# write_file(message_num)
 print("message_num.txt更新完毕")

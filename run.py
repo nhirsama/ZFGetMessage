@@ -1,3 +1,10 @@
+# Copyright 2025 nhirsama.
+#
+# 该文件修改自 https://github.com/NianBroken/ZFCheckScores (Copyright © 2024 NianBroken. All rights reserved.)
+# 遵循 Apache License 2.0。
+#
+# 修改内容：main函数的所有部分均复制于main.py文件，由xwy231321修改部分代码
+
 # 必要的依赖库
 # 按理说应该导入main.py文件调用里面的方法的，但是我懒得改了。
 import hashlib
@@ -245,4 +252,4 @@ def main():
 if __name__ == '__main__':
     while True:
         main()
-        time.sleep(30 * 60)
+        time.sleep(120 * 60)    #每两小时运行一次，每日运行12次。以防减少学校服务器运行压力。
