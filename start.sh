@@ -20,19 +20,22 @@ log() {
 
 log "======== 脚本开始执行，工作目录: $SCRIPT_DIR ========"
 
-# 拉取或更新代码
-if [ -d ".git" ]; then
-    log "已有 Git 仓库，执行 fetch && reset"
-    git fetch origin "$GIT_BRANCH" >> "$LOGFILE" 2>&1
-    git reset --hard "origin/$GIT_BRANCH" >> "$LOGFILE" 2>&1
-    log "代码已更新到 origin/$GIT_BRANCH"
-else
-    log "克隆仓库 $REPO_URL 到当前目录"
-    # 若已在 SCRIPT_DIR，但可能已有其他内容，建议确保空目录或无冲突
-    git clone --branch "$GIT_BRANCH" "$REPO_URL" . >> "$LOGFILE" 2>&1
-    log "克隆完成"
-fi
-
+{
+  set +e
+  # 拉取或更新代码
+  if [ -d ".git" ]; then
+      log "已有 Git 仓库，执行 fetch && reset"
+      git fetch origin "$GIT_BRANCH" >> "$LOGFILE" 2>&1
+      git reset --hard "origin/$GIT_BRANCH" >> "$LOGFILE" 2>&1
+      log "代码已更新到 origin/$GIT_BRANCH"
+  else
+      log "克隆仓库 $REPO_URL 到当前目录"
+      # 若已在 SCRIPT_DIR，但可能已有其他内容，建议确保空目录或无冲突
+      git clone --branch "$GIT_BRANCH" "$REPO_URL" . >> "$LOGFILE" 2>&1
+      log "克隆完成"
+  fi
+  set -e
+}
 # 检查 env.txt
 if [ ! -f "$ENV_FILE" ]; then
     log "错误：未找到 env.txt ($SCRIPT_DIR/$ENV_FILE)，退出"
