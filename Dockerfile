@@ -1,5 +1,5 @@
 # 使用官方 slim-image
-FROM python:3.9-slim
+FROM python:3.12-slim
 
 # 升级 pip
 RUN pip install --upgrade pip
