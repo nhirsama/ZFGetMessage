@@ -9,7 +9,7 @@ from scripts.get_grade import get_grade
 from scripts.get_selected_courses import get_selected_courses
 from scripts.push import send_message
 from datetime import datetime
-
+from src.grade_processor import GradeProcessor
 
 # MD5加密
 def md5_encrypt(string):
@@ -42,6 +42,7 @@ def get_env():
         "GITHUB_RUN_ID",
         "BEIJING_TIME",
         "GITHUB_STEP_SUMMARY",
+        "FORCE_PUSH_MESSAGE",
     ]
     for key in keys:
         val = os.getenv(key)
@@ -49,7 +50,7 @@ def get_env():
             if key in ("URL", "USERNAME", "PASSWORD", "TOKEN"):
                 # 对于这些关键字段缺失时，抛出异常
                 raise EnvVarMissingError(f"缺少必需环境变量: {key}")
-            env[key] = None  # 缺失时设为空
+            env[key.lower()] = None  # 缺失时设为空
         else:
             # 将换将变量中的布尔相应转换为bool值，否则返回原始值。
             def if_bool(val: str):
@@ -383,6 +384,12 @@ def main():
         # 删除目录及其内容
         shutil.rmtree(cache_folder)
 
+def main2():
+    env = get_env()
+    grade_processor = GradeProcessor(env)
+    student_client = login(env["url"], env["username"], env["password"])
+    result = grade_processor.process(student_client)
+    print(result)
 
 if __name__ == "__main__":
-    main()
+    main2()

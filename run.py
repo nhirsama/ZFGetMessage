@@ -262,7 +262,7 @@ if __name__ == '__main__':
         url = f"https://push.showdoc.com.cn/server/api/push/{token}"
         word = repr(error)
         print(word)
-        title = "教务系统推送异常，程序因以外错误而终止"
+        title = "教务系统推送异常，程序因意外错误而终止"
         # 创建一个字典，包含标题和内容
         data = {"title": title, "content": word}
         # 将字典转换为JSON字符串，并编码为UTF-8
