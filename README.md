@@ -39,7 +39,37 @@
    5. 计算百分制 `GPA`
    6. 对于没有分数仅有级别的成绩，例如”及格、良好、优秀“，可以强制显示数字分数。
 
-## 使用方法一：GitHub Actions
+   
+## 使用方法一：Docker容器
+
+### 1. 克隆本项目
+
+在控制台中输入下列指令克隆该项目。  
+```bash
+git clone https://github.com/nhirsama/ZFCheckScores.git
+```
+### 2. 创建容器
+输入下列指令以创建名为`zfcheckscores`的容器。  
+
+```bash
+cd ZFCheckScores
+```
+```bash
+sudo docker build -t zfcheckscores .
+```
+### 3. 运行容器并设置环境变量
+输入下列指令，并应将'<>'所引的内容改为正确内容。  
+```bash
+sudo docker run -dit -e URL=<你所在大学的教务url> -e USERNAME=<你的学号> -e PASSWORD=<你的密码> -e TOKEN=<你的token> -e PUSH=https://push.showdoc.com.cn/server/api/push/ zfcheckscores
+```
+注1： `sudo`命令用于在Ubuntu等Linux发行版中使用管理员权限运行命令，管理员账户则不需要此命令。  
+
+注2： docker容器中环境变量信息使用明文存储，因此请确保服务器信息安全！
+
+
+## 使用方法二：GitHub Actions
+
+**注:此方法来自原存储库,重构时并未特意编写 GitHub Actions 相关内容,可能完全不可用.**
 
 ### 1. [Fork](https://github.com/xwy231321/ZFCheckScores/fork "Fork") 本仓库
 
@@ -73,33 +103,6 @@
 _若你的程序正常运行且未报错，那么在此之后，程序将会每隔 30 分钟自动检测一次成绩是否有更新_
 
 _若你看不懂上述使用方法，你可以查看[详细使用方法](https://nianbroken.github.io/ZFCheckScores/ "详细使用方法")_
-
-## 使用方法二：Docker容器
-
-### 1. 克隆本项目
-
-在控制台中输入下列指令克隆该项目。  
-```bash
-git clone https://github.com/nhirsama/ZFCheckScores
-```
-### 2. 创建容器
-输入下列指令以创建名为`zfcheckscores`的容器。  
-
-```bash
-cd ZFCheckScores
-```
-```bash
-sudo docker build -t zfcheckscores .
-```
-### 3. 运行容器并设置环境变量
-输入下列指令，并应将'<>'所引的内容改为正确内容。  
-```bash
-sudo docker run -dit -e URL=<你所在大学的教务url> -e USERNAME=<你的学号> -e PASSWORD=<你的密码> -e TOKEN=<你的token> zfcheckscores
-```
-注1： `sudo`命令用于在Ubuntu等Linux发行版中使用管理员权限运行命令，管理员账户则不需要此命令。  
-
-注2： docker容器中环境变量信息使用明文存储，因此请确保服务器信息安全！
-
 ## 程序逻辑
 
 1. 读取对应 json 文件中的内容
