@@ -1,6 +1,5 @@
 import os
 import json
-import re
 
 from datetime import datetime
 from scripts.get_user_info import get_user_info
@@ -13,7 +12,6 @@ class GradeProcessor:
         self.data_dir = 'data'
         os.makedirs(self.data_dir, exist_ok=True)
         self.grade_file = os.path.join(self.data_dir, "grade_records.json")
-        self.notice_file = os.path.join(self.data_dir, "notice_records.json")
 
         # 初始化文件
         self._init_files()
@@ -21,10 +19,7 @@ class GradeProcessor:
     def _init_files(self):
         """初始化必要的存储文件"""
         if not os.path.exists(self.grade_file):
-            with open(self.grade_file, 'w') as f:
-                json.dump([], f)
-        if not os.path.exists(self.notice_file):
-            with open(self.notice_file, 'w') as f:
+            with open(self.grade_file, 'w', encoding='utf-8') as f:
                 json.dump([], f)
 
     def _sanitize_grade(self, grade):
@@ -35,11 +30,9 @@ class GradeProcessor:
             'credit': grade.get('credit'),
             'grade': grade.get('grade'),
             'grade_point': grade.get('grade_point'),
-            'percentage_grades': grade.get('percentage_grades'),
             'submission_time': grade.get('submission_time'),
             'teacher': grade.get('teacher'),
             'title': grade.get('title'),
-            'xfjd': grade.get('xfjd')
         }
 
     def _get_new_grades(self, current_grades):
@@ -81,11 +74,9 @@ class GradeProcessor:
                     seen_ids.add(grade_id)
                     unique_grades.append(grade)
 
-            # 按提交时间排序（最新的在前）
-            #unique_grades.sort(key=lambda x: x.get('submission_time', ''), reverse=True)
 
             # 保存更新后的记录
-            with open(self.grade_file, 'w') as f:
+            with open(self.grade_file, 'w', encoding='utf-8') as f:
                 json.dump(unique_grades[:100], f, ensure_ascii=False, indent=2)
 
         return new_grades
@@ -156,7 +147,7 @@ class GradeProcessor:
             'content': "",
             'has_error': False,
             'error_content': [],
-            'has_new_grades': False,
+            'has_new': False,
             'run_log': ""
         }
 
@@ -194,14 +185,14 @@ class GradeProcessor:
             if new_grades:
                 # 格式化新增成绩
                 integrated_grade_info = self._format_grade_markdown(new_grades)
-                result['has_new_grades'] = True
+                result['has_new'] = True
             else:
                 last_submission_time = get_grade(student_client, output_type="last_submission_time")
                 integrated_grade_info = f"------\n成绩信息：\n成绩未更新\n最近一次更新时间：{last_submission_time}\n------"
 
         # 工作流信息
         workflow_info = self._get_workflow_info()
-        copyright_text = "Copyright © 2024 NianBroken. All rights reserved."
+        copyright_text = "Copyright © 2025 nhirsama.\n[关于](https://github.com/nhirsama/ZFGetMessage/)"
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # 整合所有信息

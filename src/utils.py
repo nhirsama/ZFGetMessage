@@ -67,6 +67,7 @@ def get_env():
         "FORCE_PUSH_MESSAGE",
         "GITHUB_ACTIONS",
         "URL",
+        "PUSH_URL",
         "USERNAME",
         "PASSWORD",
         "TOKEN",
