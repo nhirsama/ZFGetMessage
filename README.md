@@ -40,7 +40,59 @@
    6. 对于没有分数仅有级别的成绩，例如”及格、良好、优秀“，可以强制显示数字分数。
 
    
-## 使用方法一：Docker容器
+## 使用方法一: podman容器(推荐)
+podman 是一款完全兼容 Docker 的现代化容器,可以直接运行 Docker 项目.
+### 1. 安装 podman 容器  
+* 对于 Debian/Ubuntu 系列，一般：
+
+  ```bash
+  sudo apt update
+  sudo apt install -y podman git
+  ```
+* 对于 RHEL/CentOS/Fedora 系列，一般：
+
+  ```bash
+  sudo dnf install -y podman git
+  ```
+* 确认安装成功：
+
+  ```bash
+  podman --version
+  ```
+### 2. 修改 `ven.txt` 文件
+在你的服务器中打开 `ven.txt` 文件,按照要求输入必要的信息.  
+因必要信息是明文存储在服务器中,请保护好个人信息.
+### 3. 运行一键脚本
+给脚本添加可执行权限,并运行一次.  
+若前面配置完全正确,此时应该会给你推送两条信息.  
+若没有收到推送信息,请查看 `run.log` 日志查找问题.
+
+```bash
+cd ZFGetMessage
+chmod +x ./start.sh
+./start
+```
+### 4. 使用 `Cron` 定时执行脚本任务
+1. 编辑要运行脚本的用户的 crontab，例如以 root 或特定用户身份：
+
+   ```bash
+   crontab -e
+   ```
+2. 添加：  
+    假设 `path` 为脚本所在位置的绝对目录,若不知道可以使用```pwd```命令查看当前位置
+   ```
+   0 */3 * * * path/start.sh
+   ```
+
+    * 上述在每隔 3 小时的整点（0:00、3:00、6:00…）执行一次。
+    * 日志已在脚本内重定向，无需在 cron 再加重定向。若希望将 cron 错误输出也记录，可修改为：
+
+      ```
+      0 */3 * * * path/start.sh >> path/cron.log 2>&1
+      ```
+3. 保存后生效。可通过检查 `path/run.log` 或 `pathcron.log` 来确认执行情况。
+
+## 使用方法二：Docker容器
 
 ### 1. 克隆本项目
 
@@ -67,7 +119,7 @@ sudo docker run -dit -e URL=<你所在大学的教务url> -e USERNAME=<你的学
 注2： docker容器中环境变量信息使用明文存储，因此请确保服务器信息安全！
 
 
-## 使用方法二：GitHub Actions
+## 使用方法三：GitHub Actions
 
 **注:此方法来自原存储库,重构时并未特意编写 GitHub Actions 相关内容,可能完全不可用.**
 

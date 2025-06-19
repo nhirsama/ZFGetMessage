@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # 配置区（均为相对或基于脚本目录的文件名）
-REPO_URL="https://github.com/nhirsama/ZFGetMessage.git"
+REPO_URL="https://github.com/nhirsama/ZFGetMessage"
 GIT_BRANCH="main"
 
 ENV_FILE="env.txt"          # 位于脚本同一目录下
