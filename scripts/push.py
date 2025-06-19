@@ -14,9 +14,9 @@ from scripts.ad import get_advertise
 
 
 # 定义函数send_message，用于发送消息
-def send_message(token, title, content):
+def send_message(token, title, content, push_url="https://push.showdoc.com.cn/server/api/push/"):
     # 推送消息的url，格式化字符串以包含token
-    url = f"https://push.showdoc.com.cn/server/api/push/{token}"
+    url = f"{push_url}{token}"
     # 调用get_advertise函数获取广告内容
     advertise = get_advertise()
     # 如果广告内容不为空，则将广告内容添加到消息内容前
@@ -53,8 +53,8 @@ def send_message(token, title, content):
     return response_dict
 
 
-def check_message_push(token, title, content):
-    url = f"https://push.showdoc.com.cn/server/api/push/{token}"
+def check_message_push(token, title, content, push_url="https://push.showdoc.com.cn/server/api/push/"):
+    url = f"{push_url}{token}"
     word = ''
     for i in content:
         if i['type'] == 'None':
