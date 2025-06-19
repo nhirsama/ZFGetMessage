@@ -17,8 +17,6 @@ def md5_encrypt(string):
 
 
 class EnvVarMissingError(Exception):
-    #TODO:
-    #这里应该将错误信息写进日志
     """当必需环境变量缺失时抛出此异常。"""
     pass
 
@@ -53,7 +51,7 @@ def get_env():
                 raise EnvVarMissingError(f"缺少必需环境变量: {key}")
             env[key] = None  # 缺失时设为空
         else:
-            #将换将变量中的布尔相应转换为bool值，否则返回原始值。
+            # 将换将变量中的布尔相应转换为bool值，否则返回原始值。
             def if_bool(val: str):
                 true_val = ['ok', 'true', 'yes']
                 false_val = ['no', 'false']
@@ -65,8 +63,59 @@ def get_env():
                     return val
 
             val = if_bool(val)
-            env[key] = val
+            env[key.lower()] = val
     return env
+
+
+def encrypt_personal_info(info_str):
+    """
+    加密个人信息字符串
+    保留名字的第一个字、班级汉字部分，其他部分用星号替换
+    """
+    lines = info_str.split('\n')
+    encrypted_lines = []
+
+    for line in lines:
+        # 跳过空行
+        if not line.strip():
+            encrypted_lines.append(line)
+            continue
+
+        # 提取标签和值
+        parts = line.split('：', 1)
+        if len(parts) < 2:
+            encrypted_lines.append(line)
+            continue
+
+        label, value = parts
+
+        # 根据标签类型进行不同的加密处理
+        if label == '姓名':
+            # 保留第一个字，其余替换为星号
+            if value:
+                encrypted_value = value[0] + '*' * (len(value) - 1)
+            else:
+                encrypted_value = '***'
+            encrypted_lines.append(f"{label}：{encrypted_value}")
+
+        elif label == '班级':
+            # 只保留汉字部分，非汉字替换为星号
+            encrypted_value = ''.join(
+                char if '\u4e00' <= char <= '\u9fff' else '*'
+                for char in value
+            )
+            encrypted_lines.append(f"{label}：{encrypted_value}")
+
+        elif label == '学号':
+            # 学号全部替换为星号
+            encrypted_value = '*' * len(value)
+            encrypted_lines.append(f"{label}：{encrypted_value}")
+
+        else:
+            # 其他信息原样保留
+            encrypted_lines.append(line)
+
+    return '\n'.join(encrypted_lines)
 
 
 def main():
@@ -103,10 +152,10 @@ def main():
     student_client = login(env["url"], env["username"], env["password"])
 
     # 获取个人信息
-    info = get_user_info(student_client, output_type="info")
+    info = encrypt_personal_info(get_user_info(student_client, output_type="info"))
 
     # 获取完整个人信息
-    integrated_info = get_user_info(student_client, output_type="integrated_info")
+    integrated_info = encrypt_personal_info(get_user_info(student_client, output_type="integrated_info"))
 
     if not info or not integrated_info:
         error_content.append("个人信息为空")
@@ -199,18 +248,18 @@ def main():
     workflow_info = (
         f"------\n"
         f"工作流信息：\n"
-        f"Force Push Message：{env["force_push_message"]}\n"
-        f"Branch Name：{env["github_ref_name"]}\n"
-        f"Triggered By：{env["github_event_name"]}\n"
-        f"Initial Run By：{env["github_actor"]}\n"
-        f"Initial Run By ID：{env["github_actor_id"]}\n"
-        f"Initiated Run By：{env["github_triggering_actor"]}\n"
-        f"Repository Name：{env["repository_name"]}\n"
-        f"Commit SHA：{env["github_sha"]}\n"
-        f"Workflow Name：{env["github_workflow"]}\n"
-        f"Workflow Number：{env["github_run_number"]}\n"
-        f"Workflow ID：{env["github_run_id"]}\n"
-        f"Beijing Time：{env["beijing_time"]}"
+        f"Force Push Message：{env['force_push_message']}\n"  # 双引号改为单引号
+        f"Branch Name：{env['github_ref_name']}\n"
+        f"Triggered By：{env['github_event_name']}\n"
+        f"Initial Run By：{env['github_actor']}\n"
+        f"Initial Run By ID：{env['github_actor_id']}\n"
+        f"Initiated Run By：{env['github_triggering_actor']}\n"
+        f"Repository Name：{env['repository_name']}\n"
+        f"Commit SHA：{env['github_sha']}\n"
+        f"Workflow Name：{env['github_workflow']}\n"
+        f"Workflow Number：{env['github_run_number']}\n"
+        f"Workflow ID：{env['github_run_id']}\n"
+        f"Beijing Time：{env['beijing_time']}"
     )
 
     copyright_text = "Copyright © 2024 NianBroken. All rights reserved."
@@ -230,7 +279,7 @@ def main():
         f"{integrated_info}\n"
         f"{integrated_grade_info}\n"
         f"{selected_courses_filtering}\n"
-        f"{workflow_info if env["github_actions"] else current_time}\n"
+        f"{workflow_info if env['github_actions'] else current_time}\n"
         f"{copyright_text}"
     )
 
@@ -239,7 +288,7 @@ def main():
 
     # 整合成绩已更新时需要使用到的所有信息
     grades_updated_push_integrated_send_info = (
-        f"{'强制推送信息成功' if env["force_push_message"] else '教务管理系统成绩已更新'}\n"
+        f"{'强制推送信息成功' if env['force_push_message'] else '教务管理系统成绩已更新'}\n"
         f"------\n"
         f"{integrated_send_info}"
     )
@@ -272,7 +321,7 @@ def main():
                 run_log += "------\n"
 
                 # 判断是否选中了强制推送信息
-                run_log += f"{'强制推送信息' if env["force_push_message"] else '成绩已更新'}\n"
+                run_log += f"{'强制推送信息' if env['force_push_message'] else '成绩已更新'}\n"
 
                 # 推送信息
                 response_text = send_message(

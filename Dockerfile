@@ -1,16 +1,18 @@
-# 使用官方的 Python 镜像作为基础镜像
+# 使用官方 slim-image
 FROM python:3.9-slim
 
-RUN apt-get update
-RUN apt-get install -y python3
+# 升级 pip
+RUN pip install --upgrade pip
+
 # 设置工作目录
 WORKDIR /app
 
-# 将当前目录下的所有文件复制到容器的 /app 目录
-COPY . /app
+# 复制依赖声明并安装，再复制代码——这样能更好利用 Docker 缓存
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 安装项目依赖
-RUN pip install -r requirements.txt
+# 复制源代码
+COPY . .
 
-# 运行应用程序
-CMD python3 run.py
+# 指定容器启动命令
+CMD ["python", "main.py"]

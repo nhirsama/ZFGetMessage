@@ -8,31 +8,26 @@
 # 必要的依赖库
 # 按理说应该导入main.py文件调用里面的方法的，但是我懒得改了。
 import hashlib
+import json
 import os
-import re
 import shutil
 import time
 from datetime import datetime
 
+import requests
+
 from scripts.get_grade import get_grade
+from scripts.get_message import get_message
 from scripts.get_selected_courses import get_selected_courses
 from scripts.get_user_info import get_user_info
 from scripts.push import send_message
 from scripts.user_login import login
 
 
-def main():
+def main(url, username, password, token):
     # MD5加密
     def md5_encrypt(string):
         return hashlib.md5(string.encode()).hexdigest()
-
-    # 从环境变量中提取教务系统的URL、用户名、密码和TOKEN等信息
-    force_push_message = os.environ.get("FORCE_PUSH_MESSAGE")
-    github_actions = os.environ.get("GITHUB_ACTIONS")
-    url = os.environ.get("URL")
-    username = os.environ.get("USERNAME")
-    password = os.environ.get("PASSWORD")
-    token = os.environ.get("TOKEN")
 
     # 将字符串转换为布尔值
     # 是否强制推送信息
@@ -248,8 +243,35 @@ def main():
         # 删除目录及其内容
         shutil.rmtree(cache_folder)
 
-#其实这个py文件就比mian多了四行代码，但是为了与GitHub Actions兼容而我又不想加判断就这么写了
+
+# 其实这个py文件就比mian多了四行代码，但是为了与GitHub Actions兼容而我又不想加判断就这么写了
 if __name__ == '__main__':
-    while True:
-        main()
-        time.sleep(120 * 60)    #每两小时运行一次，每日运行12次。以防减少学校服务器运行压力。
+    try:
+        while True:
+            # 从环境变量中提取教务系统的URL、用户名、密码和TOKEN等信息
+            url = os.environ.get("URL")
+            username = os.environ.get("USERNAME")
+            password = os.environ.get("PASSWORD")
+            token = os.environ.get("TOKEN")
+            main(url, username, password, token)
+            get_message(url, username, password, token)
+            time.sleep(120 * 60)  # 每两小时运行一次，每日运行12次。以减少学校服务器运行压力。
+    # 增加所有异常的处理，并将其推送至微信。当程序内部出现问题而终止时可
+    except Exception as error:
+        token = os.environ.get("TOKEN")
+        url = f"https://push.showdoc.com.cn/server/api/push/{token}"
+        word = repr(error)
+        print(word)
+        title = "教务系统推送异常，程序因以外错误而终止"
+        # 创建一个字典，包含标题和内容
+        data = {"title": title, "content": word}
+        # 将字典转换为JSON字符串，并编码为UTF-8
+        body = json.dumps(data).encode(encoding="utf-8")
+        # 定义HTTP请求头，设置内容类型为JSON
+        headers = {"Content-Type": "application/json"}
+        # 发送POST请求，携带JSON数据和请求头
+        response = requests.post(url, data=body, headers=headers)
+        # 解析响应的JSON数据，转换为字典
+        response_dict = json.loads(response.text)
+        # 返回响应字典
+        print(response_dict)
