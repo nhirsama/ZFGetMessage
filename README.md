@@ -61,7 +61,7 @@ podman 是一款完全兼容 Docker 的现代化容器,可以直接运行 Docker
   ```
 ### 2. Clone 此项目
 ```bash
-git clone https://github.com/nhirsama/ZFCheckScores.git
+git clone https://github.com/nhirsama/ZFCheckScores
 ```
 然后创建 `ven.txt` 文件.
 ```bash
