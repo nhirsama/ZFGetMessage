@@ -114,7 +114,7 @@ chmod +x ./start.sh
 
 在控制台中输入下列指令克隆该项目。  
 ```bash
-git clone https://github.com/nhirsama/ZFCheckScores.git
+git clone https://github.com/nhirsama/ZFCheckScores
 ```
 ### 2. 创建容器
 输入下列指令以创建名为`zfcheckscores`的容器。  
