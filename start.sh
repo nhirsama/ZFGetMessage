@@ -19,23 +19,29 @@ log() {
 }
 
 log "======== 脚本开始执行，工作目录: $SCRIPT_DIR ========"
-#下面是自动拉取git库脚本，取消注释后在下次运行时更新git，之后被git库中的start.sh覆盖。
-#{
-#  set +e
-#  # 拉取或更新代码
-#  if [ -d ".git" ]; then
-#      log "已有 Git 仓库，执行 fetch && reset"
-#      git fetch origin "$GIT_BRANCH" >> "$LOGFILE" 2>&1
-#      git reset --hard "origin/$GIT_BRANCH" >> "$LOGFILE" 2>&1
-#      log "代码已更新到 origin/$GIT_BRANCH"
-#  else
-#      log "克隆仓库 $REPO_URL 到当前目录"
-#      # 若已在 SCRIPT_DIR，但可能已有其他内容，建议确保空目录或无冲突
-#      git clone --branch "$GIT_BRANCH" "$REPO_URL" . >> "$LOGFILE" 2>&1
-#      log "克隆完成"
-#  fi
-#  set -e
-#}
+# 下面为自动拉取main分支部分，若不希望自动更新，请将其删除
+{
+  set +e
+  # 设置变量
+  GIT_BRANCH="main"
+  LOGFILE="update.log"
+
+  # 打日志函数（可选）
+  log() {
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOGFILE"
+  }
+
+  log "开始拉取远程 $GIT_BRANCH 分支"
+
+  # 获取远程最新提交
+  git fetch origin "$GIT_BRANCH" >> "$LOGFILE" 2>&1
+
+  # 合并远程分支，冲突时始终保留本地内容
+  git merge -X ours origin/"$GIT_BRANCH" -m "合并远程 $GIT_BRANCH，保留本地改动" >> "$LOGFILE" 2>&1
+
+  log "更新完成，已保留本地改动"
+  set -e
+}
 # 检查 env.txt
 if [ ! -f "$ENV_FILE" ]; then
     log "错误：未找到 env.txt ($SCRIPT_DIR/$ENV_FILE)，退出"
