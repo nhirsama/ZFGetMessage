@@ -42,6 +42,17 @@ if [ ! -f "$ENV_FILE" ]; then
     exit 1
 fi
 
+# 检查 data 目录
+DATA_DIR="$SCRIPT_DIR/data"
+if [ ! -d "$DATA_DIR" ]; then
+    log "未找到 data 目录，创建：$DATA_DIR"
+    mkdir -p "$DATA_DIR"
+    # 可根据需要在此处初始化文件，如：touch "$DATA_DIR/file1.ext"
+else
+    log "找到 data 目录：$DATA_DIR"
+fi
+
+
 # 解析 env.txt 构建 build-arg 数组
 BUILD_ARGS=()
 while IFS= read -r line || [ -n "$line" ]; do
@@ -63,14 +74,21 @@ done < "$ENV_FILE"
 
 # 构建镜像
 log "开始构建镜像 $IMAGE_NAME，build-args: ${BUILD_ARGS[*]}"
+
 # 如需网络选项，可在调用时加 --network=host
 podman build "${BUILD_ARGS[@]}" -t "$IMAGE_NAME" . >> "$LOGFILE" 2>&1
 log "镜像构建完成"
 
-# 运行容器
-log "开始运行容器 $IMAGE_NAME"
-# 使用 --env-file 传入 env.txt
-podman run --rm --env-file "$ENV_FILE" "$IMAGE_NAME" >> "$LOGFILE" 2>&1
-log "容器运行结束"
+# 运行容器并挂载 data 目录
+log "开始运行容器 $IMAGE_NAME，挂载 data 目录: $DATA_DIR"
+podman run --rm \
+    --env-file "$ENV_FILE" \
+    -v "$DATA_DIR":/app/data:Z \
+    "$IMAGE_NAME" >> "$LOGFILE" 2>&1
+RET=$?
+if [ $RET -ne 0 ]; then
+    log "容器运行失败，退出码 $RET"
+    exit $RET
+fi
 
 log "======== 脚本执行完成 ========"
