@@ -59,9 +59,25 @@ podman 是一款完全兼容 Docker 的现代化容器,可以直接运行 Docker
   ```bash
   podman --version
   ```
-### 2. 修改 `ven.txt` 文件
-在你的服务器中打开 `ven.txt` 文件,按照要求输入必要的信息.  
+### 2. Clone 此项目
+```bash
+git clone https://github.com/nhirsama/ZFCheckScores.git
+```
+然后创建 `ven.txt` 文件.
+```bash
+nano ven.txt
+```
+按照下面要求输入必要的信息.  
 因必要信息是明文存储在服务器中,请保护好个人信息.
+```txt
+PASSWORD=修改为你的密码
+# 若你使用其他的推送服务，请修改下面的PUSH_URL
+PUSH_URL=https://push.showdoc.com.cn/server/api/push/
+TOKEN=修改为你的推送token
+URL=修改为你的教务url
+# username 为你的教务登陆用户名，一般情况下为学号
+USERNAME=修改为你的学号
+```
 ### 3. 运行一键脚本
 给脚本添加可执行权限,并运行一次.  
 若前面配置完全正确,此时应该会给你推送两条信息.  
