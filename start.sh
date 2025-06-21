@@ -41,6 +41,7 @@ log "======== 脚本开始执行，工作目录: $SCRIPT_DIR ========"
 
     log "更新完成，已保留本地改动"
     set -e
+    LOGFILE="run.log"
 }
 # 检查 env.txt
 if [ ! -f "$ENV_FILE" ]; then
