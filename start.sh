@@ -21,26 +21,26 @@ log() {
 log "======== 脚本开始执行，工作目录: $SCRIPT_DIR ========"
 # 下面为自动拉取main分支部分，若不希望自动更新，请将其删除
 {
-  set +e
-  # 设置变量
-  GIT_BRANCH="main"
-  LOGFILE="update.log"
+    set +e
+    # 设置变量
+    GIT_BRANCH="main"
+    LOGFILE="update.log"
 
-  # 打日志函数（可选）
-  log() {
-      echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOGFILE"
-  }
+    # 打日志函数（可选）
+    log() {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOGFILE"
+    }
 
-  log "开始拉取远程 $GIT_BRANCH 分支"
+    log "开始拉取远程 $GIT_BRANCH 分支"
 
-  # 获取远程最新提交
-  git fetch origin "$GIT_BRANCH" >> "$LOGFILE" 2>&1
+    # 获取远程最新提交
+    git fetch origin "$GIT_BRANCH" >> "$LOGFILE" 2>&1
 
-  # 合并远程分支，冲突时始终保留本地内容
-  git merge -X ours origin/"$GIT_BRANCH" -m "合并远程 $GIT_BRANCH，保留本地改动" >> "$LOGFILE" 2>&1
+    # 合并远程分支，冲突时始终保留本地内容
+    git merge -X ours origin/"$GIT_BRANCH" -m "合并远程 $GIT_BRANCH，保留本地改动" >> "$LOGFILE" 2>&1
 
-  log "更新完成，已保留本地改动"
-  set -e
+    log "更新完成，已保留本地改动"
+    set -e
 }
 # 检查 env.txt
 if [ ! -f "$ENV_FILE" ]; then
@@ -79,7 +79,7 @@ while IFS= read -r line || [ -n "$line" ]; do
 done < "$ENV_FILE"
 
 # 构建镜像
-log "开始构建镜像 $IMAGE_NAME，build-args: ${BUILD_ARGS[*]}"
+log "开始构建镜像 $IMAGE_NAME，build-args: env变量"
 
 # 如需网络选项，可在调用时加 --network=host
 podman build "${BUILD_ARGS[@]}" -t "$IMAGE_NAME" . >> "$LOGFILE" 2>&1
@@ -96,5 +96,11 @@ if [ $RET -ne 0 ]; then
     log "容器运行失败，退出码 $RET"
     exit $RET
 fi
+
+# 截断超过1000行的日志文件
+if [ -f "$LOGFILE" ]; then
+    tail -n 999 "$LOGFILE" > "$LOGFILE.tmp" && mv "$LOGFILE.tmp" "$LOGFILE"
+fi
+
 
 log "======== 脚本执行完成 ========"
