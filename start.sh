@@ -99,7 +99,7 @@ fi
 
 # 截断超过1000行的日志文件
 if [ -f "$LOGFILE" ]; then
-    tail -n 1000 "$LOGFILE" > "$LOGFILE.tmp" && mv "$LOGFILE.tmp" "$LOGFILE"
+    tail -n 999 "$LOGFILE" > "$LOGFILE.tmp" && mv "$LOGFILE.tmp" "$LOGFILE"
 fi
 
 
