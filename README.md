@@ -10,11 +10,14 @@
 
 **使用本项目后：**
 
-教务有通知后**自动发通知到微信** 以节省您宝贵的时间
+教务有通知后**自动发通知到微信**以节省您宝贵的时间
 
+更新:
+在 [6月19日](https://github.com/nhirsama/ZFGetMessage/commit/0246abd99cd5980e1df87d73ba6f92f26a4d2989)
+的提交中重构了主体模块的实现。  
 本项目在由 [xwy231321](https://github.com/xwy231321/ZFCheckScores) 
 修改的开源项目 [ZFCheckScores](https://github.com/NianBroken/ZFCheckScores/) 
-的基础上添加推送教务系统通知而来，本项目将依照 [NianBroken](https://github.com/NianBroken) 
+的基础上添加教务系统通知推送而来，本项目将依照 [NianBroken](https://github.com/NianBroken) 
 的开源许可证[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0 "Apache-2.0")进行修改与二次开源。
 ## 测试环境
 ### 1.教务环境
