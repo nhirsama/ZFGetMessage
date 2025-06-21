@@ -1,4 +1,4 @@
-# 正方教务管理系统成绩推送
+# 正方教务管理系统消息推送
 
 <img src="https://raw.githubusercontent.com/xwy231321/ZFCheckScores/main/img/7.jpg" style="zoom:60%;" />
 
@@ -10,38 +10,48 @@
 
 **使用本项目后：**
 
-成绩更新后**自动发通知到微信** 以节省您宝贵的时间
+教务有通知后**自动发通知到微信** 以节省您宝贵的时间
 
 本项目在由 [xwy231321](https://github.com/xwy231321/ZFCheckScores) 
 修改的开源项目 [ZFCheckScores](https://github.com/NianBroken/ZFCheckScores/) 
 的基础上添加推送教务系统通知而来，本项目将依照 [NianBroken](https://github.com/NianBroken) 
 的开源许可证[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0 "Apache-2.0")进行修改与二次开源。
 ## 测试环境
-
+### 1.教务环境
 正方教务管理系统 版本 V8.0、V9.0
 
 如果你的教务系统页面与下图所示的页面**完全一致**或**几乎一致**，则代表你可以使用本项目。
 
 <img src="https://raw.githubusercontent.com/xwy231321/ZFCheckScores/main/img/9.png" style="zoom:60%;" />
 
+### 2.本地环境
+操作系统: Linux Mint 22.1 Cinnamon  
+IDE: CLion 2025.1  
+解释器: Python 3.12  
+
+### 3.服务器环境
+操作系统: Ubuntu 24.04 64位  
+容器: podman version 4.9.3
+
 ## 目前支持的功能
 
 1. 主要功能
 
-   1. 每隔 30 分钟自动检测一次成绩是否有更新，若有更新，将通过微信推送及时通知用户。
+   1. 每隔三小时自动检测一次教务是否有新通知，若有更新，将通过微信推送及时通知用户。
 
 2. 相较于教务系统增加了哪些功能？
 
    1. 显示成绩提交时间，即成绩何时被录入教务系统。
    2. 显示成绩提交人姓名，即成绩由谁录入进教务系统。
-   3. 成绩信息按时间降序排序，确保最新的成绩始终在最上方，提升用户查阅效率。
-   4. 计算 `GPA`
-   5. 计算百分制 `GPA`
-   6. 对于没有分数仅有级别的成绩，例如”及格、良好、优秀“，可以强制显示数字分数。
+   3. 计算 `GPA`
+   4. 计算百分制 `GPA`
+   5. 对于没有分数仅有级别的成绩，例如”及格、良好、优秀“，可以强制显示数字分数。
+   6. 消息分类推送,分为`成绩推送`、`消息通知`两种。
+   7. 增量更新, 除第一次为全量推送以外,只推送新增的信息。
 
    
 ## 使用方法一: podman容器(推荐)
-podman 是一款完全兼容 Docker 的现代化容器,可以直接运行 Docker 项目.
+`podman` 是一款完全兼容 Docker 的现代化容器,可以直接运行 Docker 项目.
 ### 1. 安装 podman 容器  
 * 对于 Debian/Ubuntu 系列，一般：
 
@@ -94,18 +104,22 @@ chmod +x ./start.sh
    ```bash
    crontab -e
    ```
-2. 添加：  
-    假设 `path` 为脚本所在位置的绝对目录,若不知道可以使用```pwd```命令查看当前位置
-   ```
-   0 */3 * * * path/start.sh
-   ```
-
-    * 上述在每隔 3 小时的整点（0:00、3:00、6:00…）执行一次。
-    * 日志已在脚本内重定向，无需在 cron 再加重定向。若希望将 cron 错误输出也记录，可修改为：
-
+   2. 添加：  
+       假设 `path` 为脚本所在位置的绝对目录,若不知道可以使用```pwd```命令查看当前位置
       ```
-      0 */3 * * * path/start.sh >> path/cron.log 2>&1
+      0 */3 * * * path/start.sh
       ```
+
+       * 上述在每隔 3 小时的整点（0:00、3:00、6:00…）执行一次。
+       * 日志已在脚本内重定向，无需在 cron 再加重定向。若希望将 cron 错误输出也记录，可修改为：
+
+         ```
+         0 */3 * * * path/start.sh >> path/cron.log 2>&1
+         ```
+       * 可以自行修改 cron 命令以自定义检测间隔时间。例如下面为每天九点整运行此项目。
+         ``` cron
+         0 9 * * * path/start.sh >> path/cron.log 2>&1
+         ```
 3. 保存后生效。可通过检查 `path/run.log` 或 `pathcron.log` 来确认执行情况。
 
 ## 使用方法二：Docker容器
