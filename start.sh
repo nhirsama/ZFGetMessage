@@ -26,10 +26,6 @@ log "======== 脚本开始执行，工作目录: $SCRIPT_DIR ========"
     GIT_BRANCH="main"
     LOGFILE="update.log"
 
-    # 打日志函数（可选）
-    log() {
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOGFILE"
-    }
 
     log "开始拉取远程 $GIT_BRANCH 分支"
 
