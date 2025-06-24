@@ -74,7 +74,7 @@ IDE: CLion 2025.1
   ```
 ### 2. Clone 此项目
 ```bash
-git clone https://github.com/nhirsama/ZFCheckScores
+git clone https://github.com/nhirsama/ZFGetMessage
 ```
 然后创建 `ven.txt` 文件.
 ```bash
@@ -131,21 +131,21 @@ chmod +x ./start.sh
 
 在控制台中输入下列指令克隆该项目。  
 ```bash
-git clone https://github.com/nhirsama/ZFCheckScores
+git clone https://github.com/nhirsama/ZFGetMessage
 ```
 ### 2. 创建容器
-输入下列指令以创建名为`zfcheckscores`的容器。  
+输入下列指令以创建名为`zfgetmessage`的容器。  
 
 ```bash
-cd ZFCheckScores
+cd ZFGetMessage
 ```
 ```bash
-sudo docker build -t zfcheckscores .
+sudo docker build -t zfgetmessage .
 ```
 ### 3. 运行容器并设置环境变量
 输入下列指令，并应将'<>'所引的内容改为正确内容。  
 ```bash
-sudo docker run -dit -e URL=<你所在大学的教务url> -e USERNAME=<你的学号> -e PASSWORD=<你的密码> -e TOKEN=<你的token> -e PUSH=https://push.showdoc.com.cn/server/api/push/ zfcheckscores
+sudo docker run -dit -e URL=<你所在大学的教务url> -e USERNAME=<你的学号> -e PASSWORD=<你的密码> -e TOKEN=<你的token> -e PUSH_URL=https://push.showdoc.com.cn/server/api/push/ zfgetmessage
 ```
 注1： `sudo`命令用于在Ubuntu等Linux发行版中使用管理员权限运行命令，管理员账户则不需要此命令。  
 
