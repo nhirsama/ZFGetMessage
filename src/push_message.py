@@ -25,10 +25,10 @@ class PushMessage:
         if self.result['has_error']:
             val = self.push("错误日志",self.result['content'])
             print(val['error_message'])
-            return 1
+            return "出现错误，已推送错误日志"
         elif self.result['has_new']:
             val = self.push(self.result['title'],self.result['content'])
             print(val['error_message'])
-            return 0
+            return "成绩或消息有更新，已推送"
         else:
-            return 0
+            return "成绩或消息无变动"
