@@ -84,6 +84,8 @@ def get_env():
         "BEIJING_TIME",
         "GITHUB_STEP_SUMMARY",
         "FORCE_PUSH_MESSAGE",
+        "RUN_INTERVAL",
+        "CRON_EXPRESSION",
     ]
     for key in keys:
         val = os.getenv(key)

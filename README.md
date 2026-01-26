@@ -90,6 +90,11 @@ TOKEN=修改为你的推送token
 URL=修改为你的教务url
 # username 为你的教务登陆用户名，一般情况下为学号
 USERNAME=修改为你的学号
+# 如果设置了 CRON_EXPRESSION，程序将使用 Cron 逻辑调度。
+# 如果仅设置了 RUN_INTERVAL（秒），程序将使用简单的间隔循环。
+# 如果两者都未设置，程序运行一次后退出。
+RUN_INTERVAL=10800
+CRON_EXPRESSION=0 */3 * * *
 ```
 ### 3. 运行一键脚本
 给脚本添加可执行权限,并运行一次.  
