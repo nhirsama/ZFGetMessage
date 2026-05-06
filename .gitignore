@@ -1,2 +1,8 @@
 /.venv/
-/.idea
+/__pycache__/
+/.idea/
+/data/
+/env.txt
+/*.log
+*.py[cod]
+.env

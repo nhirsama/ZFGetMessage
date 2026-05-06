@@ -179,7 +179,7 @@ class Client:
                 return {"code": 998, "msg": tips.text()}
             self.cookies = self.sess.cookies.get_dict()
             # 不同学校系统兼容差异
-            if not self.cookies.get("route"):
+            if not self.cookies.get("route") and cookies.get("route"):
                 route_cookies = {
                     "JSESSIONID": self.cookies["JSESSIONID"],
                     "route": cookies["route"],
@@ -417,13 +417,19 @@ class Client:
                 "count": len(grade_items),
                 "courses": [
                     {
+                        "course_id": i.get("kch_id"),
                         "title": i.get("kcmc"),
                         "teacher": i.get("jsxm"),
                         "class_name": i.get("jxbmc"),
                         "class_id": i.get("jxb_id"),
                         "credit": self.align_floats(i.get("xf")),
+                        "category": i.get("kclbmc"),
+                        "nature": i.get("kcxzmc"),
                         "grade": self.parse_int(i.get("cj")),
                         "grade_point": self.align_floats(i.get("jd")),
+                        "grade_nature": i.get("ksxz"),
+                        "start_college": i.get("kkbmmc"),
+                        "mark": i.get("kcbj"),
                         "submission_time": i.get("tjsj"),
                         "name_of_submitter": i.get("tjrxm"),
                         "xfjd": i.get("xfjd"),
@@ -448,6 +454,87 @@ class Client:
         except Exception as e:
             traceback.print_exc()
             return {"code": 999, "msg": "获取成绩时未记录的错误：" + str(e)}
+
+    def get_exam_schedule(self, year: int, term: int = 0):
+        """获取考试信息"""
+        url = urljoin(
+            self.base_url,
+            "kwgl/kscx_cxXsksxxIndex.html?doType=query&gnmkdm=N358105",
+        )
+        temp_term = term
+        term = term**2 * 3
+        term = "" if term == 0 else term
+        data = {
+            "xnm": str(year),  # 学年数
+            "xqm": str(term),  # 学期数，第一学期为3，第二学期为12, 整个学年为空''
+            "_search": "false",
+            "nd": int(time.time() * 1000),
+            "queryModel.showCount": "100",  # 每页最多条数
+            "queryModel.currentPage": "1",
+            "queryModel.sortName": "",
+            "queryModel.sortOrder": "asc",
+            "time": "0",  # 查询次数
+        }
+        try:
+            req_exam = self.sess.post(
+                url,
+                headers=self.headers,
+                data=data,
+                cookies=self.cookies,
+                timeout=self.timeout,
+            )
+            if req_exam.status_code != 200:
+                return {"code": 2333, "msg": "教务系统挂了"}
+            doc = pq(req_exam.text)
+            if doc("h5").text() == "用户登录":
+                return {"code": 1006, "msg": "未登录或已过期，请重新登录"}
+            exam = req_exam.json()
+            exam_items = exam.get("items")
+            if not exam_items:
+                return {"code": 1005, "msg": "获取内容为空"}
+            result = {
+                "sid": exam_items[0]["xh"],
+                "name": exam_items[0]["xm"],
+                "year": year,
+                "term": temp_term,
+                "count": len(exam_items),
+                "courses": [
+                    {
+                        "course_id": i.get("kch"),
+                        "title": i.get("kcmc"),
+                        "time": i.get("kssj"),
+                        "location": i.get("cdmc"),
+                        "xq": i.get("cdxqmc"),
+                        "zwh": i.get("zwh"),
+                        "cxbj": i.get("cxbj", ""),
+                        "exam_name": i.get("ksmc"),
+                        "teacher": i.get("jsxx"),
+                        "class_name": i.get("jxbmc"),
+                        "kkxy": i.get("kkxy"),
+                        "credit": self.align_floats(i.get("xf")),
+                        "ksfs": i.get("ksfs"),
+                        "sjbh": i.get("sjbh"),
+                        "bz": i.get("bz1", ""),
+                    }
+                    for i in exam_items
+                ],
+            }
+            return {"code": 1000, "msg": "获取考试信息成功", "data": result}
+        except exceptions.Timeout:
+            return {"code": 1003, "msg": "获取考试信息超时"}
+        except (
+            exceptions.RequestException,
+            json.decoder.JSONDecodeError,
+            AttributeError,
+        ):
+            traceback.print_exc()
+            return {
+                "code": 2333,
+                "msg": "请重试，若多次失败可能是系统错误维护或需更新接口",
+            }
+        except Exception as e:
+            traceback.print_exc()
+            return {"code": 999, "msg": "获取考试信息时未记录的错误：" + str(e)}
 
     def get_schedule(self, year: int, term: int):
         """获取课程表信息"""
@@ -914,6 +1001,76 @@ class Client:
             traceback.print_exc()
             return {"code": 999, "msg": f"获取已选课程时未记录的错误：{str(e)}"}
 
+    def get_selected_courses2(self, year: int = 0, term: int = 0):
+        """获取已选课程信息2"""
+        try:
+            url = urljoin(
+                self.base_url,
+                "xsxxxggl/xsxxwh_cxXsxkxx.html?gnmkdm=N100801",
+            )
+            temp_term = term
+            if year == 0 or term == 0:
+                year = ""
+                term = ""
+            else:
+                term = term**2 * 3
+            data = {
+                "xnm": str(year),
+                "xqm": str(term),
+                "_search": "false",
+                "queryModel.showCount": 5000,
+                "queryModel.currentPage": 1,
+                "queryModel.sortName": "",
+                "queryModel.sortOrder": "asc",
+                "time": 1,
+            }
+            req_selected = self.sess.post(
+                url,
+                data=data,
+                headers=self.headers,
+                cookies=self.cookies,
+                timeout=self.timeout,
+            )
+            if req_selected.status_code != 200:
+                return {"code": 2333, "msg": "教务系统挂了"}
+            doc = pq(req_selected.text)
+            if doc("h5").text() == "用户登录":
+                return {"code": 1006, "msg": "未登录或已过期，请重新登录"}
+            selected = req_selected.json()
+            result = {
+                "year": year,
+                "term": temp_term,
+                "count": len(selected["items"]),
+                "courses": [
+                    {
+                        "course_id": i.get("kch"),
+                        "class_id": i.get("jxb_id"),
+                        "title": i.get("kcmc"),
+                        "credit": float(i.get("xf", 0)),
+                        "teacher": i.get("jsxm"),
+                        "category": i.get("kclbmc"),
+                        "place": i.get("jxdd"),
+                    }
+                    for i in selected["items"]
+                ],
+            }
+            return {"code": 1000, "msg": "获取已选课程2成功", "data": result}
+        except exceptions.Timeout:
+            return {"code": 1003, "msg": "获取已选课程2超时"}
+        except (
+            exceptions.RequestException,
+            json.decoder.JSONDecodeError,
+            AttributeError,
+        ):
+            traceback.print_exc()
+            return {
+                "code": 2333,
+                "msg": "请重试，若多次失败可能是系统错误维护或需更新接口",
+            }
+        except Exception as e:
+            traceback.print_exc()
+            return {"code": 999, "msg": f"获取已选课程2时未记录的错误：{str(e)}"}
+
     def get_block_courses(self, year: int, term: int, block: int):
         """获取板块课选课列表"""
         # TODO: 优化代码
@@ -1049,6 +1206,7 @@ class Client:
                 "count": len(temp_list),
                 "courses": [
                     {
+                        "course_id": j.get("kch_id"),
                         "class_id": j.get("jxb_id"),
                         "do_id": j.get("do_jxb_id"),
                         "title": j.get("kcmc"),
@@ -1225,7 +1383,7 @@ class Client:
         try:
             data_list = [(th.text).strip() for th in ths]
             return data_list[6]
-        except IndexError:
+        except Exception:
             return None
 
     @classmethod
