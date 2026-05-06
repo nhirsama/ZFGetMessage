@@ -1,6 +1,10 @@
 import hashlib
 import os
 
+
+DEFAULT_PUSH_URL = "https://push.showdoc.com.cn/server/api/push/"
+
+
 def encrypt_personal_info(info_str):
     """
     加密个人信息字符串
@@ -83,7 +87,11 @@ def get_env():
         "GITHUB_RUN_ID",
         "BEIJING_TIME",
         "GITHUB_STEP_SUMMARY",
-        "FORCE_PUSH_MESSAGE",
+        "RUN_INTERVAL",
+        "CRON_EXPRESSION",
+        "EXAM_PUSH_ENABLED",
+        "EXAM_YEAR",
+        "EXAM_TERM",
     ]
     for key in keys:
         val = os.getenv(key)
@@ -91,15 +99,22 @@ def get_env():
             if key in ("URL", "USERNAME", "PASSWORD", "TOKEN"):
                 # 对于这些关键字段缺失时，抛出异常
                 raise EnvVarMissingError(f"缺少必需环境变量: {key}")
-            env[key.lower()] = None  # 缺失时设为空
+            env[key.lower()] = DEFAULT_PUSH_URL if key == "PUSH_URL" else None
         else:
+            val = val.strip()
+            if key in ("PUSH_URL", "RUN_INTERVAL", "CRON_EXPRESSION", "EXAM_YEAR", "EXAM_TERM") and not val:
+                env[key.lower()] = DEFAULT_PUSH_URL if key == "PUSH_URL" else None
+                continue
+            if key in ("RUN_INTERVAL", "CRON_EXPRESSION", "EXAM_YEAR", "EXAM_TERM"):
+                val = val.strip("'\"")
             # 将换将变量中的布尔相应转换为bool值，否则返回原始值。
             def if_bool(val: str):
                 true_val = ['ok', 'true', 'yes']
                 false_val = ['no', 'false']
-                if val.lower() in true_val:
+                normalized_val = val.lower()
+                if normalized_val in true_val:
                     return True
-                elif val.lower in false_val:
+                elif normalized_val in false_val:
                     return False
                 else:
                     return val

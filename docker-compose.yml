@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+    image: zfgetmessage:latest
+    container_name: zfgetmessage
+    restart: unless-stopped
+    env_file:
+      - env.txt
+    volumes:
+      - ./data:/app/data

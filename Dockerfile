@@ -12,6 +12,9 @@ COPY requirements.txt .
 # 使用阿里源，加快下载速度
 RUN pip install --no-cache-dir -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 
+# 设置环境变量，确保 Python 输出不被缓存
+ENV PYTHONUNBUFFERED=1
+
 # 复制源代码
 COPY . .
 

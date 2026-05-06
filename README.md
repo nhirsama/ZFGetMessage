@@ -12,13 +12,6 @@
 
 教务有通知后**自动发通知到微信**以节省您宝贵的时间
 
-更新:
-在 [6月19日](https://github.com/nhirsama/ZFGetMessage/commit/0246abd99cd5980e1df87d73ba6f92f26a4d2989)
-的提交中重构了主体模块的实现。  
-本项目在由 [xwy231321](https://github.com/xwy231321/ZFCheckScores) 
-修改的开源项目 [ZFCheckScores](https://github.com/NianBroken/ZFCheckScores/) 
-的基础上添加教务系统通知推送而来，本项目将依照 [NianBroken](https://github.com/NianBroken) 
-的开源许可证[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0 "Apache-2.0")进行修改与二次开源。
 ## 测试环境
 ### 1.教务环境
 正方教务管理系统 版本 V8.0、V9.0
@@ -28,7 +21,7 @@
 <img src="https://raw.githubusercontent.com/xwy231321/ZFCheckScores/main/img/9.png" style="zoom:60%;" />
 
 ### 2.本地环境
-操作系统: Linux Mint 22.1 Cinnamon  
+操作系统: Arch Linux  
 IDE: CLion 2025.1  
 解释器: Python 3.12  
 
@@ -50,38 +43,29 @@ IDE: CLion 2025.1
    4. 计算百分制 `GPA`
    5. 对于没有分数仅有级别的成绩，例如”及格、良好、优秀“，可以强制显示数字分数。
    6. 消息分类推送,分为`成绩推送`、`消息通知`两种。
-   7. 增量更新, 除第一次为全量推送以外,只推送新增的信息。
+   7. 考试安排变更推送。
+   8. 增量更新, 除第一次为全量推送以外,只推送新增的信息。
 
    
-## 使用方法一: podman容器(推荐)
-`podman` 是一款完全兼容 Docker 的现代化容器,可以直接运行 Docker 项目.
-### 1. 安装 podman 容器  
-* 对于 Debian/Ubuntu 系列，一般：
-
+## 使用方法一: docker-compose(推荐)
+`docker-compose` 是管理容器化应用的最便捷方式，本项目已完美适配。
+### 1. 安装 Docker 与 Docker Compose
+请确保您的服务器已安装 Docker。
+* 对于 Debian/Ubuntu 系列：
   ```bash
   sudo apt update
-  sudo apt install -y podman git
-  ```
-* 对于 RHEL/CentOS/Fedora 系列，一般：
-
-  ```bash
-  sudo dnf install -y podman git
-  ```
-* 确认安装成功：
-
-  ```bash
-  podman --version
+  sudo apt install -y docker.io docker-compose-v2 git
   ```
 ### 2. Clone 此项目
 ```bash
 git clone https://github.com/nhirsama/ZFGetMessage
+cd ZFGetMessage
 ```
-然后创建 `ven.txt` 文件.
+然后创建 `env.txt` 文件并输入配置信息：
 ```bash
-nano ven.txt
+nano env.txt
 ```
-按照下面要求输入必要的信息.  
-因必要信息是明文存储在服务器中,请保护好个人信息.
+配置示例（请保护好您的个人隐私信息）：
 ```txt
 PASSWORD=修改为你的密码
 # 若你使用其他的推送服务，请修改下面的PUSH_URL
@@ -90,66 +74,48 @@ TOKEN=修改为你的推送token
 URL=修改为你的教务url
 # username 为你的教务登陆用户名，一般情况下为学号
 USERNAME=修改为你的学号
-```
-### 3. 运行一键脚本
-给脚本添加可执行权限,并运行一次.  
-若前面配置完全正确,此时应该会给你推送两条信息.  
-若没有收到推送信息,请查看 `run.log` 日志查找问题.
 
+# 调度配置：
+# 如果设置了 CRON_EXPRESSION，程序将使用 Cron 逻辑调度（推荐）。
+# 如果仅设置了 RUN_INTERVAL（秒），程序将使用简单的间隔循环。
+# 示例：每 3 小时整点运行一次
+# RUN_INTERVAL=10800
+CRON_EXPRESSION="0 */3 * * *"
+
+# 考试通知配置：
+# 默认启用考试通知，并自动查询当前学年全年考试安排。
+# 如需指定学年或学期，可取消下面注释；EXAM_TERM 可填 0（全年）、1、2。
+# EXAM_YEAR=2025
+# EXAM_TERM=0
+# EXAM_PUSH_ENABLED=true
+```
+### 3. 运行容器
+无需运行额外脚本，直接使用 Docker Compose 启动服务：
 ```bash
-cd ZFGetMessage
-chmod +x ./start.sh
-./start
+# 构建并后台运行
+docker compose up -d --build
 ```
-### 4. 使用 `Cron` 定时执行脚本任务
-1. 编辑要运行脚本的用户的 crontab，例如以 root 或特定用户身份：
-
-   ```bash
-   crontab -e
-   ```
-   2. 添加：  
-       假设 `path` 为脚本所在位置的绝对目录,若不知道可以使用```pwd```命令查看当前位置
-      ```
-      0 */3 * * * path/start.sh
-      ```
-
-       * 上述在每隔 3 小时的整点（0:00、3:00、6:00…）执行一次。
-       * 日志已在脚本内重定向，无需在 cron 再加重定向。若希望将 cron 错误输出也记录，可修改为：
-
-         ```
-         0 */3 * * * path/start.sh >> path/cron.log 2>&1
-         ```
-       * 可以自行修改 cron 命令以自定义检测间隔时间。例如下面为每天九点整运行此项目。
-         ``` cron
-         0 9 * * * path/start.sh >> path/cron.log 2>&1
-         ```
-3. 保存后生效。可通过检查 `path/run.log` 或 `pathcron.log` 来确认执行情况。
-
-## 使用方法二：Docker容器
-
-### 1. 克隆本项目
-
-在控制台中输入下列指令克隆该项目。  
+### 4. 查看日志
+由于服务在后台运行，您可以随时通过以下命令查看实时运行日志：
 ```bash
-git clone https://github.com/nhirsama/ZFGetMessage
+docker compose logs -f
 ```
-### 2. 创建容器
-输入下列指令以创建名为`zfgetmessage`的容器。  
 
+## 使用方法二: podman容器
+`podman` 是一款完全兼容 Docker 的现代化容器。
+### 1. 安装 podman 
 ```bash
-cd ZFGetMessage
+sudo apt install -y podman git podman-compose
 ```
+### 2. 配置与运行
+配置方式与 `docker-compose` 完全一致。创建好 `env.txt` 后，直接运行：
 ```bash
-sudo docker build -t zfgetmessage .
-```
-### 3. 运行容器并设置环境变量
-输入下列指令，并应将'<>'所引的内容改为正确内容。  
-```bash
-sudo docker run -dit -e URL=<你所在大学的教务url> -e USERNAME=<你的学号> -e PASSWORD=<你的密码> -e TOKEN=<你的token> -e PUSH_URL=https://push.showdoc.com.cn/server/api/push/ zfgetmessage
-```
-注1： `sudo`命令用于在Ubuntu等Linux发行版中使用管理员权限运行命令，管理员账户则不需要此命令。  
+# 使用 podman-compose (如果安装了)
+podman-compose up -d --build
 
-注2： docker容器中环境变量信息使用明文存储，因此请确保服务器信息安全！
+# 或者使用 podman 直接运行 (如果不使用 compose)
+# 注意：这需要手动处理挂载和环境变量，建议安装 podman-compose
+```
 
 
 ## 使用方法三：GitHub Actions
@@ -195,9 +161,17 @@ _若你看不懂上述使用方法，你可以查看[详细使用方法](https:/
 3. 通过关键信息查找新增的通知
 4. 修改 json 并推送
 
+## 更新
+ - 在 [2026年1月26日](https://github.com/nhirsama/ZFGetMessage/commit/de2ed15fa55cf37469d6287d818e7ee49a0f22e3) 的提交中优化了项目的运行方式，避免多次构建 docker 镜像导致项目占用空间快速膨胀。
+
+ - 在 [2025年6月19日](https://github.com/nhirsama/ZFGetMessage/commit/0246abd99cd5980e1df87d73ba6f92f26a4d2989) 的提交中重构了主体模块的实现。  
+本项目在由 [xwy231321](https://github.com/xwy231321/ZFCheckScores) 
+修改的开源项目 [ZFCheckScores](https://github.com/NianBroken/ZFCheckScores/) 
+的基础上添加教务系统通知推送而来，本项目将依照 [NianBroken](https://github.com/NianBroken) 
+的开源许可证[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0 "Apache-2.0")进行修改与二次开源。
 
 ## 许可证 
-`Copyright © 2025 nhirsama.`  
+`Copyright © 2025-2026 nhirsama.`  
 `Copyright © 2024 NianBroken. All rights reserved.`
 
 本项目采用 [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0 "Apache-2.0") 许可证。简而言之，你可以自由使用、修改和分享本项目的代码，但前提是在其衍生作品中必须保留原始许可证和版权信息，并且必须以相同的许可证发布所有修改过的代码。
